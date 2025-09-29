@@ -23,7 +23,6 @@ public class BranchEntity implements Persistable<String> {
   @Column("id_branch")
   private String id;
 
-  @Column("name")
   private String name;
 
   @Column("id_franchise")

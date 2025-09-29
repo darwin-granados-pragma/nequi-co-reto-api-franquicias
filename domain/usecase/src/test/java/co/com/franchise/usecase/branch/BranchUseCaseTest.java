@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import co.com.franchise.model.branch.Branch;
 import co.com.franchise.model.branch.BranchCreate;
+import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.BranchRepository;
 import co.com.franchise.usecase.franchise.FranchiseUseCase;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ class BranchUseCaseTest {
       .name(createData.name())
       .idFranchise(createData.idFranchise())
       .build();
+  private final String idBranch = branch.getId();
 
   @Mock
   private BranchRepository repository;
@@ -60,5 +62,36 @@ class BranchUseCaseTest {
         .verifyComplete();
     verify(repository, times(1)).save(any(Branch.class));
     verify(franchiseUseCase, times(1)).validateFranchiseById(anyString());
+  }
+
+  @Test
+  void shouldValidateBranchById() {
+    // Arrange
+    when(repository.existById(idBranch)).thenReturn(Mono.just(true));
+
+    // Act
+    var result = useCase.validateBranchById(idBranch);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .verifyComplete();
+    verify(repository, times(1)).existById(idBranch);
+  }
+
+  @Test
+  void shouldThrowObjectNotFoundException_WhenBranchNotExist() {
+    // Arrange
+    when(repository.existById(idBranch)).thenReturn(Mono.just(false));
+
+    // Act
+    var result = useCase.validateBranchById(idBranch);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+    verify(repository, times(1)).existById(idBranch);
   }
 }

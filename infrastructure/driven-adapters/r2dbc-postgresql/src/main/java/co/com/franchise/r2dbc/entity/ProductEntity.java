@@ -13,17 +13,22 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
-@Table(name = "franchise")
+@Table(name = "product")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class FranchiseEntity implements Persistable<String> {
+public class ProductEntity implements Persistable<String> {
 
   @Id
-  @Column("id_franchise")
+  @Column("id_product")
   private String id;
 
   private String name;
+
+  @Column("id_branch")
+  private String idBranch;
+
+  private Integer stock;
 
   @Transient
   private boolean isNew;

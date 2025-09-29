@@ -45,4 +45,10 @@ public class BranchReactiveRepositoryAdapter extends
         )
         .doOnSuccess(branchSaved -> log.debug("Branch saved: {}", branchSaved));
   }
+
+  @Override
+  public Mono<Boolean> existById(String id) {
+    log.info("Validating existence of the branch by id: {}", id);
+    return super.repository.existsById(id);
+  }
 }
