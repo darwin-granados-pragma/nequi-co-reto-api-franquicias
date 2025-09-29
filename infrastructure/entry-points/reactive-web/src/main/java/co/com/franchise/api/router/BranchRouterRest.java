@@ -5,9 +5,9 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 import co.com.franchise.api.error.ErrorResponse;
 import co.com.franchise.api.error.GlobalErrorWebFilter;
-import co.com.franchise.api.handler.FranchiseHandler;
-import co.com.franchise.api.model.request.FranchiseCreateRequest;
-import co.com.franchise.api.model.response.FranchiseResponse;
+import co.com.franchise.api.handler.BranchHandler;
+import co.com.franchise.api.model.request.BranchCreateRequest;
+import co.com.franchise.api.model.response.BranchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,30 +23,30 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 @RequiredArgsConstructor
-public class FranchiseRouterRest {
+public class BranchRouterRest {
 
-  private static final String PATH = "/api/v1/franchise";
+  private static final String PATH = "/api/v1/branch";
 
-  private final FranchiseHandler franchiseHandler;
+  private final BranchHandler branchHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
 
   @Bean
   @RouterOperation(method = RequestMethod.POST,
       path = PATH,
-      beanClass = FranchiseHandler.class,
-      beanMethod = "createFranchise",
-      operation = @Operation(operationId = "createFranchise",
-          summary = "Create franchise",
-          description = "Receives data of the franchise and return the created object.",
+      beanClass = BranchHandler.class,
+      beanMethod = "createBranch",
+      operation = @Operation(operationId = "createBranch",
+          summary = "Create branch",
+          description = "Receives data of the branch and return the created object.",
           requestBody = @RequestBody(required = true,
               content = @Content(mediaType = "application/json",
-                  schema = @Schema(implementation = FranchiseCreateRequest.class)
+                  schema = @Schema(implementation = BranchCreateRequest.class)
               )
           ),
           responses = {@ApiResponse(responseCode = "200",
-              description = "Franchise created successfully.",
+              description = "Branch created successfully.",
               content = @Content(mediaType = "application/json",
-                  schema = @Schema(implementation = FranchiseResponse.class)
+                  schema = @Schema(implementation = BranchResponse.class)
               )
           ), @ApiResponse(responseCode = "400",
               description = "Parameters invalid or missing.",
@@ -54,14 +54,14 @@ public class FranchiseRouterRest {
                   schema = @Schema(implementation = ErrorResponse.class)
               )
           ), @ApiResponse(responseCode = "409",
-              description = "Franchise with that name already exists.",
+              description = "Branch with that name already exists.",
               content = @Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)
               )
           )}
       )
   )
-  public RouterFunction<ServerResponse> franchiseRouterFunction() {
-    return route(POST(PATH), franchiseHandler::createFranchise).filter(globalErrorWebFilter);
+  public RouterFunction<ServerResponse> branchRouterFunction() {
+    return route(POST(PATH), branchHandler::createBranch).filter(globalErrorWebFilter);
   }
 }

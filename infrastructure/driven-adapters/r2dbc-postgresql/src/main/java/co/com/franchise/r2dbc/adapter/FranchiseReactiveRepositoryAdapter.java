@@ -45,4 +45,10 @@ public class FranchiseReactiveRepositoryAdapter extends
         )
         .doOnSuccess(franchiseSaved -> log.debug("Franchise saved: {}", franchiseSaved));
   }
+
+  @Override
+  public Mono<Boolean> existById(String id) {
+    log.info("Validating existence of the franchise by id: {}", id);
+    return super.repository.existsById(id);
+  }
 }
