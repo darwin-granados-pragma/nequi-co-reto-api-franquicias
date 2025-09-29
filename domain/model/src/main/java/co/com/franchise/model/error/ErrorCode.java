@@ -15,6 +15,7 @@ public enum ErrorCode {
   ),
   CONSTRAINT_VIOLATION(ExceptionCode.CONSTRAINT_VIOLATION, "Constraint violation."),
   FRANCHISE_NOT_FOUND(ExceptionCode.NOT_FOUND, "Franchise not found by id: "),
+  BRANCH_NOT_FOUND(ExceptionCode.NOT_FOUND, "Branch not found by id: "),
   ;
   private final ExceptionCode exceptionCode;
   private final String message;

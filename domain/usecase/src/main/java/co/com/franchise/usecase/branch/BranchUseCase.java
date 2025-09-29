@@ -2,6 +2,8 @@ package co.com.franchise.usecase.branch;
 
 import co.com.franchise.model.branch.Branch;
 import co.com.franchise.model.branch.BranchCreate;
+import co.com.franchise.model.error.ErrorCode;
+import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.BranchRepository;
 import co.com.franchise.usecase.franchise.FranchiseUseCase;
 import java.util.UUID;
@@ -18,6 +20,13 @@ public class BranchUseCase {
     return franchiseUseCase
         .validateFranchiseById(data.idFranchise())
         .then(buildAndSave(data));
+  }
+
+  public Mono<Void> validateBranchById(String id) {
+    return repository
+        .existById(id)
+        .flatMap(exists -> Boolean.TRUE.equals(exists) ? Mono.empty()
+            : Mono.error(new ObjectNotFoundException(ErrorCode.BRANCH_NOT_FOUND, id)));
   }
 
   private Mono<Branch> buildAndSave(BranchCreate data) {

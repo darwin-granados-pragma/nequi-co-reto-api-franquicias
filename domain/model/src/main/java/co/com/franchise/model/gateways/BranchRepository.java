@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface BranchRepository {
 
   Mono<Branch> save(Branch branch);
+  Mono<Boolean> existById(String id);
 }
