@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.franchise.Franchise;
 import co.com.franchise.model.franchise.FranchiseCreate;
 import co.com.franchise.model.gateways.FranchiseRepository;
@@ -25,6 +26,7 @@ class FranchiseUseCaseTest {
       .id("Test-id")
       .name(createData.name())
       .build();
+  private final String idFranchise = franchise.getId();
 
   @Mock
   private FranchiseRepository repository;
@@ -50,5 +52,36 @@ class FranchiseUseCaseTest {
             .equals(franchise.getName()))
         .verifyComplete();
     verify(repository, times(1)).save(any(Franchise.class));
+  }
+
+  @Test
+  void shouldValidateFranchiseById() {
+    // Arrange
+    when(repository.existById(idFranchise)).thenReturn(Mono.just(true));
+
+    // Act
+    var result = useCase.validateFranchiseById(idFranchise);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .verifyComplete();
+    verify(repository, times(1)).existById(idFranchise);
+  }
+
+  @Test
+  void shouldThrowObjectNotFoundException_WhenFranchiseNotExist() {
+    // Arrange
+    when(repository.existById(idFranchise)).thenReturn(Mono.just(false));
+
+    // Act
+    var result = useCase.validateFranchiseById(idFranchise);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+    verify(repository, times(1)).existById(idFranchise);
   }
 }
