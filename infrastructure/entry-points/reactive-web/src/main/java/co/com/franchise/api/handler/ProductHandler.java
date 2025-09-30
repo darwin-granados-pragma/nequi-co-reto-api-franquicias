@@ -2,8 +2,10 @@ package co.com.franchise.api.handler;
 
 import co.com.franchise.api.mapper.ProductRestMapper;
 import co.com.franchise.api.model.request.ProductCreateRequest;
+import co.com.franchise.api.model.request.ProductUpdateNameRequest;
 import co.com.franchise.api.model.request.ProductUpdateStockRequest;
 import co.com.franchise.model.product.ProductCreate;
+import co.com.franchise.model.product.ProductUpdateName;
 import co.com.franchise.model.product.ProductUpdateStock;
 import co.com.franchise.usecase.product.ProductUseCase;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,8 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class ProductHandler {
+
+  private static final String ID_PRODUCT = "idProduct";
 
   private final ProductUseCase useCase;
   private final ProductRestMapper mapper;
@@ -51,7 +55,7 @@ public class ProductHandler {
         serverRequest.method()
     );
     return Mono.defer(() -> {
-      String idProduct = serverRequest.pathVariable("idProduct");
+      String idProduct = serverRequest.pathVariable(ID_PRODUCT);
       return useCase
           .deleteById(idProduct)
           .then(ServerResponse
@@ -66,7 +70,7 @@ public class ProductHandler {
         serverRequest.method()
     );
     return Mono.defer(() -> {
-      String idProduct = serverRequest.pathVariable("idProduct");
+      String idProduct = serverRequest.pathVariable(ID_PRODUCT);
       return serverRequest
           .bodyToMono(ProductUpdateStockRequest.class)
           .flatMap(request -> requestValidator
@@ -75,6 +79,30 @@ public class ProductHandler {
                 ProductUpdateStock updateStock = mapper.toProductUpdateStock(request);
                 return useCase
                     .updateStockByIdProduct(idProduct, updateStock)
+                    .map(mapper::toProductResponse)
+                    .flatMap(response -> ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(response));
+              })));
+    });
+  }
+
+  public Mono<ServerResponse> updateNameByIdProduct(ServerRequest serverRequest) {
+    log.info("Received request to update name of the product at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idProduct = serverRequest.pathVariable(ID_PRODUCT);
+      return serverRequest
+          .bodyToMono(ProductUpdateNameRequest.class)
+          .flatMap(request -> requestValidator
+              .validate(request)
+              .then(Mono.defer(() -> {
+                ProductUpdateName updatedData = mapper.toProductUpdateName(request);
+                return useCase
+                    .updateNameByIdProduct(idProduct, updatedData)
                     .map(mapper::toProductResponse)
                     .flatMap(response -> ServerResponse
                         .status(HttpStatus.OK)
