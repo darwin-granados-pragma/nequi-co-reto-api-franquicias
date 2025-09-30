@@ -45,4 +45,10 @@ public class ProductReactiveRepositoryAdapter extends
     log.info("Deleting product by id: {}", id);
     return super.repository.deleteById(id);
   }
+
+  @Override
+  public Mono<Product> findById(String id) {
+    log.info("Retrieving product by id: {}", id);
+    return super.findById(id);
+  }
 }
