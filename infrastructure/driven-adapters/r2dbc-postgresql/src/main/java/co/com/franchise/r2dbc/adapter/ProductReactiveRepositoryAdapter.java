@@ -47,6 +47,14 @@ public class ProductReactiveRepositoryAdapter extends
   }
 
   @Override
+  public Mono<Product> findTopByIdBranch(String idBranch) {
+    log.info("Retrieving top product stock by branch with id: {}", idBranch);
+    return super.repository
+        .findTopByIdBranchOrderByStockDesc(idBranch)
+        .map(this::toEntity);
+  }
+
+  @Override
   public Mono<Product> findById(String id) {
     log.info("Retrieving product by id: {}", id);
     return super.findById(id);

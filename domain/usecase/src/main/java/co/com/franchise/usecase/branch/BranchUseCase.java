@@ -2,12 +2,15 @@ package co.com.franchise.usecase.branch;
 
 import co.com.franchise.model.branch.Branch;
 import co.com.franchise.model.branch.BranchCreate;
+import co.com.franchise.model.branch.BranchDomainResponse;
 import co.com.franchise.model.error.ErrorCode;
 import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.BranchRepository;
 import co.com.franchise.usecase.franchise.FranchiseUseCase;
+import co.com.franchise.usecase.product.ProductRetrieveUseCase;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -15,6 +18,7 @@ public class BranchUseCase {
 
   private final BranchRepository repository;
   private final FranchiseUseCase franchiseUseCase;
+  private final ProductRetrieveUseCase productRetrieveUseCase;
 
   public Mono<Branch> createBranch(BranchCreate data) {
     return franchiseUseCase
@@ -27,6 +31,14 @@ public class BranchUseCase {
         .existById(id)
         .flatMap(exists -> Boolean.TRUE.equals(exists) ? Mono.empty()
             : Mono.error(new ObjectNotFoundException(ErrorCode.BRANCH_NOT_FOUND, id)));
+  }
+
+  public Flux<BranchDomainResponse> getTopProductStockByIdFranchise(String idFranchise) {
+    return franchiseUseCase
+        .validateFranchiseById(idFranchise)
+        .thenMany(repository
+            .findAllByIdFranchise(idFranchise)
+            .flatMap(this::mapToBranchResponse));
   }
 
   private Mono<Branch> buildAndSave(BranchCreate data) {
@@ -42,5 +54,16 @@ public class BranchUseCase {
           .build();
       return repository.save(branch);
     });
+  }
+
+  private Mono<BranchDomainResponse> mapToBranchResponse(Branch branch) {
+    return productRetrieveUseCase
+        .getTopProductStockByIdBranch(branch.getId())
+        .map(productResponse -> BranchDomainResponse
+            .builder()
+            .id(branch.getId())
+            .name(branch.getName())
+            .productResponse(productResponse)
+            .build());
   }
 }

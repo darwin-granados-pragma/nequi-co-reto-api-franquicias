@@ -12,6 +12,7 @@ import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -50,5 +51,13 @@ public class BranchReactiveRepositoryAdapter extends
   public Mono<Boolean> existById(String id) {
     log.info("Validating existence of the branch by id: {}", id);
     return super.repository.existsById(id);
+  }
+
+  @Override
+  public Flux<Branch> findAllByIdFranchise(String idFranchise) {
+    log.info("Retrieving branches by franchise with id: {}", idFranchise);
+    return super.repository
+        .findAllByIdFranchise(idFranchise)
+        .map(this::toEntity);
   }
 }
