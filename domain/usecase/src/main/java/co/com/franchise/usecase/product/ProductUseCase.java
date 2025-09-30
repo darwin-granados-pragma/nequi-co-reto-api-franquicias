@@ -5,6 +5,7 @@ import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.ProductRepository;
 import co.com.franchise.model.product.Product;
 import co.com.franchise.model.product.ProductCreate;
+import co.com.franchise.model.product.ProductUpdateName;
 import co.com.franchise.model.product.ProductUpdateStock;
 import co.com.franchise.usecase.branch.BranchUseCase;
 import java.util.UUID;
@@ -33,6 +34,13 @@ public class ProductUseCase {
   public Mono<Product> updateStockByIdProduct(String idProduct, ProductUpdateStock data) {
     return getProductById(idProduct).flatMap(product -> {
       product.setStock(data.stock());
+      return repository.save(product);
+    });
+  }
+
+  public Mono<Product> updateNameByIdProduct(String idProduct, ProductUpdateName data) {
+    return getProductById(idProduct).flatMap(product -> {
+      product.setName(data.name());
       return repository.save(product);
     });
   }
