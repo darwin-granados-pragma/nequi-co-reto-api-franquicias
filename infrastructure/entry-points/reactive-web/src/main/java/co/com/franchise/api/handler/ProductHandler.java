@@ -43,4 +43,18 @@ public class ProductHandler {
             })));
   }
 
+  public Mono<ServerResponse> deleteProduct(ServerRequest serverRequest) {
+    log.info("Received request to delete a product at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idProduct = serverRequest.pathVariable("idProduct");
+      return useCase
+          .deleteById(idProduct)
+          .then(ServerResponse
+              .noContent()
+              .build());
+    });
+  }
 }

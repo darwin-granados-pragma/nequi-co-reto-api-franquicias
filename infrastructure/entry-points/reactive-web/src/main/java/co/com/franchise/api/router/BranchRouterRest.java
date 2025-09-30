@@ -53,6 +53,11 @@ public class BranchRouterRest {
               content = @Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)
               )
+          ), @ApiResponse(responseCode = "404",
+              description = "Franchise not found.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
           ), @ApiResponse(responseCode = "409",
               description = "Branch with that name already exists.",
               content = @Content(mediaType = "application/json",

@@ -1,5 +1,7 @@
 package co.com.franchise.usecase.product;
 
+import co.com.franchise.model.error.ErrorCode;
+import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.ProductRepository;
 import co.com.franchise.model.product.Product;
 import co.com.franchise.model.product.ProductCreate;
@@ -18,6 +20,13 @@ public class ProductUseCase {
     return branchUseCase
         .validateBranchById(data.idBranch())
         .then(buildAndSave(data));
+  }
+
+  public Mono<Void> deleteById(String id) {
+    return repository
+        .existById(id)
+        .flatMap(exists -> Boolean.TRUE.equals(exists) ? repository.deleteById(id)
+            : Mono.error(new ObjectNotFoundException(ErrorCode.PRODUCT_NOT_FOUND, id)));
   }
 
   private Mono<Product> buildAndSave(ProductCreate data) {
