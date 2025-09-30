@@ -96,7 +96,7 @@ class FranchiseUseCaseTest {
     when(repository.save(any(Franchise.class))).thenReturn(Mono.just(franchise));
 
     // Act
-    var result = useCase.updateStockByIdFranchise(idFranchise, updateData);
+    var result = useCase.updateNameByIdFranchise(idFranchise, updateData);
 
     // Arrange
     StepVerifier
@@ -112,12 +112,12 @@ class FranchiseUseCaseTest {
   }
 
   @Test
-  void updateStockByIdFranchise_ShouldThrowObjectNotFoundException_WhenFranchiseByIdNotFound() {
+  void updateNameByIdFranchise_ShouldThrowObjectNotFoundException_WhenFranchiseByIdNotFound() {
     // Arrange
     when(repository.findById(idFranchise)).thenReturn(Mono.empty());
 
     // Act
-    var result = useCase.updateStockByIdFranchise(idFranchise, updateData);
+    var result = useCase.updateNameByIdFranchise(idFranchise, updateData);
 
     // Arrange
     StepVerifier

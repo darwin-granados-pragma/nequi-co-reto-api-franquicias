@@ -11,4 +11,7 @@ public interface BranchRepository {
   Mono<Boolean> existById(String id);
 
   Flux<Branch> findAllByIdFranchise(String idFranchise);
+
+  Mono<Branch> findById(String id);
+
 }

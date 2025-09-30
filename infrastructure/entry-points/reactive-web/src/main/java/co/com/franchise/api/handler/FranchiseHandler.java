@@ -59,7 +59,7 @@ public class FranchiseHandler {
               .then(Mono.defer(() -> {
                 FranchiseUpdateName updatedData = mapper.toFranchiseUpdateName(request);
                 return useCase
-                    .updateStockByIdFranchise(idFranchise, updatedData)
+                    .updateNameByIdFranchise(idFranchise, updatedData)
                     .map(mapper::toFranchiseResponse)
                     .flatMap(response -> ServerResponse
                         .status(HttpStatus.OK)

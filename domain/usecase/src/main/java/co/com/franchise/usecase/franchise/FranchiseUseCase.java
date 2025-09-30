@@ -28,7 +28,7 @@ public class FranchiseUseCase {
         .flatMap(repository::save);
   }
 
-  public Mono<Franchise> updateStockByIdFranchise(String idFranchise, FranchiseUpdateName data) {
+  public Mono<Franchise> updateNameByIdFranchise(String idFranchise, FranchiseUpdateName data) {
     return getFranchiseById(idFranchise).flatMap(franchise -> {
       franchise.setName(data.name());
       return repository.save(franchise);
