@@ -2,10 +2,12 @@ package co.com.franchise.usecase.product;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.ProductRepository;
 import co.com.franchise.model.product.Product;
 import co.com.franchise.model.product.ProductCreate;
@@ -29,6 +31,7 @@ class ProductUseCaseTest {
       .idBranch(createData.idBranch())
       .stock(createData.stock())
       .build();
+  private final String idProduct = product.getId();
 
   @Mock
   private ProductRepository repository;
@@ -63,5 +66,39 @@ class ProductUseCaseTest {
         .verifyComplete();
     verify(repository, times(1)).save(any(Product.class));
     verify(branchUseCase, times(1)).validateBranchById(anyString());
+  }
+
+  @Test
+  void shouldDeleteProductByIdSuccessfully() {
+    // Arrange
+    when(repository.existById(idProduct)).thenReturn(Mono.just(true));
+    when(repository.deleteById(idProduct)).thenReturn(Mono.empty());
+
+    // Act
+    var result = useCase.deleteById(idProduct);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .verifyComplete();
+    verify(repository, times(1)).existById(idProduct);
+    verify(repository, times(1)).deleteById(idProduct);
+  }
+
+  @Test
+  void shouldThrowObjectNotFoundException_WhenProductByIdNotFound() {
+    // Arrange
+    when(repository.existById(idProduct)).thenReturn(Mono.just(false));
+
+    // Act
+    var result = useCase.deleteById(idProduct);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+    verify(repository, times(1)).existById(idProduct);
+    verify(repository, never()).deleteById(idProduct);
   }
 }
