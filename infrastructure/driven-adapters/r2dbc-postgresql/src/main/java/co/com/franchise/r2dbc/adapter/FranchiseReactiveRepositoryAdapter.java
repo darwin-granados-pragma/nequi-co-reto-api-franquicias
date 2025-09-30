@@ -51,4 +51,10 @@ public class FranchiseReactiveRepositoryAdapter extends
     log.info("Validating existence of the franchise by id: {}", id);
     return super.repository.existsById(id);
   }
+
+  @Override
+  public Mono<Franchise> findById(String id) {
+    log.info("Retrieving franchise by id: {}", id);
+    return super.findById(id);
+  }
 }
