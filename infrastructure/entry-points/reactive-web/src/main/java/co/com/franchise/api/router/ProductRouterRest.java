@@ -1,6 +1,7 @@
 package co.com.franchise.api.router;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PATCH;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -8,6 +9,7 @@ import co.com.franchise.api.error.ErrorResponse;
 import co.com.franchise.api.error.GlobalErrorWebFilter;
 import co.com.franchise.api.handler.ProductHandler;
 import co.com.franchise.api.model.request.ProductCreateRequest;
+import co.com.franchise.api.model.request.ProductUpdateStockRequest;
 import co.com.franchise.api.model.response.ProductResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +32,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class ProductRouterRest {
 
   private static final String PATH = "/api/v1/product";
-  private static final String PATH_DELETE = PATH + "/{idProduct}";
+  private static final String PATH_ID_PRODUCT = PATH + "/{idProduct}";
+  private static final String PATH_STOCK = PATH_ID_PRODUCT + "/stock";
 
   private final ProductHandler productHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
@@ -48,7 +51,7 @@ public class ProductRouterRest {
                   schema = @Schema(implementation = ProductCreateRequest.class)
               )
           ),
-          responses = {@ApiResponse(responseCode = "200",
+          responses = {@ApiResponse(responseCode = "201",
               description = "Product created successfully.",
               content = @Content(mediaType = "application/json",
                   schema = @Schema(implementation = ProductResponse.class)
@@ -61,13 +64,14 @@ public class ProductRouterRest {
           )}
       )
   ), @RouterOperation(method = RequestMethod.DELETE,
-      path = PATH_DELETE,
+      path = PATH_ID_PRODUCT,
       beanClass = ProductHandler.class,
       beanMethod = "deleteProduct",
       operation = @Operation(operationId = "deleteProduct",
           summary = "Delete product by id",
           description = "Receives identifier and delete the product.",
-          parameters = {@Parameter(in = ParameterIn.PATH,
+          parameters = {@Parameter(name = "idProduct",
+              in = ParameterIn.PATH,
               description = "Identifier of the product",
               required = true,
               schema = @Schema(type = "String")
@@ -81,11 +85,47 @@ public class ProductRouterRest {
               )
           )}
       )
+  ), @RouterOperation(method = RequestMethod.PATCH,
+      path = PATH_STOCK,
+      beanClass = ProductHandler.class,
+      beanMethod = "updateStockByIdProduct",
+      operation = @Operation(operationId = "updateStockByIdProduct",
+          summary = "Update stock of the product",
+          description = "Receives data of the product and return the updated object.",
+          parameters = {@Parameter(name = "idProduct",
+              in = ParameterIn.PATH,
+              description = "Identifier of the product",
+              required = true,
+              schema = @Schema(type = "String")
+          )},
+          requestBody = @RequestBody(required = true,
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ProductUpdateStockRequest.class)
+              )
+          ),
+          responses = {@ApiResponse(responseCode = "200",
+              description = "Stock of the product updated successfully.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ProductResponse.class)
+              )
+          ), @ApiResponse(responseCode = "400",
+              description = "Parameters invalid or missing.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          ), @ApiResponse(responseCode = "404",
+              description = "Product not found.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          )}
+      )
   )}
   )
   public RouterFunction<ServerResponse> productRouterFunction() {
     return route(POST(PATH), productHandler::createProduct)
-        .andRoute(DELETE(PATH_DELETE), productHandler::deleteProduct)
+        .andRoute(DELETE(PATH_ID_PRODUCT), productHandler::deleteProduct)
+        .andRoute(PATCH(PATH_STOCK), productHandler::updateStockByIdProduct)
         .filter(globalErrorWebFilter);
   }
 }

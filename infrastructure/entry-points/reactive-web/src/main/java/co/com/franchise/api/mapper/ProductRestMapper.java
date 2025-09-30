@@ -1,9 +1,11 @@
 package co.com.franchise.api.mapper;
 
 import co.com.franchise.api.model.request.ProductCreateRequest;
+import co.com.franchise.api.model.request.ProductUpdateStockRequest;
 import co.com.franchise.api.model.response.ProductResponse;
 import co.com.franchise.model.product.Product;
 import co.com.franchise.model.product.ProductCreate;
+import co.com.franchise.model.product.ProductUpdateStock;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants.ComponentModel;
 
@@ -11,6 +13,8 @@ import org.mapstruct.MappingConstants.ComponentModel;
 public interface ProductRestMapper {
 
   ProductCreate toProductCreate(ProductCreateRequest request);
+
+  ProductUpdateStock toProductUpdateStock(ProductUpdateStockRequest request);
 
   ProductResponse toProductResponse(Product product);
 }

@@ -2,7 +2,9 @@ package co.com.franchise.api.handler;
 
 import co.com.franchise.api.mapper.ProductRestMapper;
 import co.com.franchise.api.model.request.ProductCreateRequest;
+import co.com.franchise.api.model.request.ProductUpdateStockRequest;
 import co.com.franchise.model.product.ProductCreate;
+import co.com.franchise.model.product.ProductUpdateStock;
 import co.com.franchise.usecase.product.ProductUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +57,30 @@ public class ProductHandler {
           .then(ServerResponse
               .noContent()
               .build());
+    });
+  }
+
+  public Mono<ServerResponse> updateStockByIdProduct(ServerRequest serverRequest) {
+    log.info("Received request to update stock of the product at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idProduct = serverRequest.pathVariable("idProduct");
+      return serverRequest
+          .bodyToMono(ProductUpdateStockRequest.class)
+          .flatMap(request -> requestValidator
+              .validate(request)
+              .then(Mono.defer(() -> {
+                ProductUpdateStock updateStock = mapper.toProductUpdateStock(request);
+                return useCase
+                    .updateStockByIdProduct(idProduct, updateStock)
+                    .map(mapper::toProductResponse)
+                    .flatMap(response -> ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(response));
+              })));
     });
   }
 }

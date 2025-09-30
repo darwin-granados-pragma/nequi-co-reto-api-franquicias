@@ -6,6 +6,10 @@ import reactor.core.publisher.Mono;
 public interface ProductRepository {
 
   Mono<Product> save(Product product);
+
   Mono<Boolean> existById(String id);
+
+  Mono<Product> findById(String id);
+
   Mono<Void> deleteById(String id);
 }
