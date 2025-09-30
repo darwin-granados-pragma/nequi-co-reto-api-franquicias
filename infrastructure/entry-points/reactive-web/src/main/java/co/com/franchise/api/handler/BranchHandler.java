@@ -2,7 +2,9 @@ package co.com.franchise.api.handler;
 
 import co.com.franchise.api.mapper.BranchRestMapper;
 import co.com.franchise.api.model.request.BranchCreateRequest;
+import co.com.franchise.api.model.request.BranchUpdateNameRequest;
 import co.com.franchise.model.branch.BranchCreate;
+import co.com.franchise.model.branch.BranchUpdateName;
 import co.com.franchise.usecase.branch.BranchUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +60,30 @@ public class BranchHandler {
               .status(HttpStatus.OK)
               .contentType(MediaType.APPLICATION_JSON)
               .bodyValue(response));
+    });
+  }
+
+  public Mono<ServerResponse> updateNameByIdBranch(ServerRequest serverRequest) {
+    log.info("Received request to update name of the branch at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idBranch = serverRequest.pathVariable("idBranch");
+      return serverRequest
+          .bodyToMono(BranchUpdateNameRequest.class)
+          .flatMap(request -> requestValidator
+              .validate(request)
+              .then(Mono.defer(() -> {
+                BranchUpdateName updatedData = mapper.toBranchUpdateName(request);
+                return useCase
+                    .updateNameByIdBranch(idBranch, updatedData)
+                    .map(mapper::toBranchResponse)
+                    .flatMap(response -> ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(response));
+              })));
     });
   }
 }

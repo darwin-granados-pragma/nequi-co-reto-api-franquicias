@@ -60,4 +60,10 @@ public class BranchReactiveRepositoryAdapter extends
         .findAllByIdFranchise(idFranchise)
         .map(this::toEntity);
   }
+
+  @Override
+  public Mono<Branch> findById(String id) {
+    log.info("Retrieving branch by id: {}", id);
+    return super.findById(id);
+  }
 }

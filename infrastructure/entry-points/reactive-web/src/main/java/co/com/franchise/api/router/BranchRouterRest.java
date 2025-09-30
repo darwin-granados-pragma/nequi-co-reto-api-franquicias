@@ -1,6 +1,7 @@
 package co.com.franchise.api.router;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PATCH;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -8,6 +9,7 @@ import co.com.franchise.api.error.ErrorResponse;
 import co.com.franchise.api.error.GlobalErrorWebFilter;
 import co.com.franchise.api.handler.BranchHandler;
 import co.com.franchise.api.model.request.BranchCreateRequest;
+import co.com.franchise.api.model.request.BranchUpdateNameRequest;
 import co.com.franchise.api.model.response.BranchProductRestResponse;
 import co.com.franchise.api.model.response.BranchResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +34,7 @@ public class BranchRouterRest {
 
   private static final String PATH = "/api/v1/branch";
   private static final String PATH_FRANCHISE = PATH + "/{idFranchise}";
+  private static final String PATH_ID_BRANCH = PATH + "/{idBranch}";
 
   private final BranchHandler branchHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
@@ -96,11 +99,47 @@ public class BranchRouterRest {
               )
           )}
       )
+  ), @RouterOperation(method = RequestMethod.PATCH,
+      path = PATH_ID_BRANCH,
+      beanClass = BranchHandler.class,
+      beanMethod = "updateNameByIdBranch",
+      operation = @Operation(operationId = "updateNameByIdBranch",
+          summary = "Update name of the branch",
+          description = "Receives data of the branch and return the updated object.",
+          parameters = {@Parameter(name = "idBranch",
+              in = ParameterIn.PATH,
+              description = "Identifier of the branch",
+              required = true,
+              schema = @Schema(type = "String")
+          )},
+          requestBody = @RequestBody(required = true,
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = BranchUpdateNameRequest.class)
+              )
+          ),
+          responses = {@ApiResponse(responseCode = "200",
+              description = "Name of the branch updated successfully.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = BranchResponse.class)
+              )
+          ), @ApiResponse(responseCode = "400",
+              description = "Parameters invalid or missing.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          ), @ApiResponse(responseCode = "404",
+              description = "Branch not found.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          )}
+      )
   )}
   )
   public RouterFunction<ServerResponse> branchRouterFunction() {
     return route(POST(PATH), branchHandler::createBranch)
         .andRoute(GET(PATH_FRANCHISE), branchHandler::getListTopProductStockByIdFranchise)
+        .andRoute(PATCH(PATH_ID_BRANCH), branchHandler::updateNameByIdBranch)
         .filter(globalErrorWebFilter);
   }
 }
