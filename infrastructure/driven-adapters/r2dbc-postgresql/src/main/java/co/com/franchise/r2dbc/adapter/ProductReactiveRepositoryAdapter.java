@@ -33,4 +33,30 @@ public class ProductReactiveRepositoryAdapter extends
         .as(transactionalOperator::transactional)
         .doOnSuccess(productSaved -> log.debug("Product saved: {}", productSaved));
   }
+
+  @Override
+  public Mono<Boolean> existById(String id) {
+    log.info("Validating existence of the product by id: {}", id);
+    return super.repository.existsById(id);
+  }
+
+  @Override
+  public Mono<Void> deleteById(String id) {
+    log.info("Deleting product by id: {}", id);
+    return super.repository.deleteById(id);
+  }
+
+  @Override
+  public Mono<Product> findTopByIdBranch(String idBranch) {
+    log.info("Retrieving top product stock by branch with id: {}", idBranch);
+    return super.repository
+        .findTopByIdBranchOrderByStockDesc(idBranch)
+        .map(this::toEntity);
+  }
+
+  @Override
+  public Mono<Product> findById(String id) {
+    log.info("Retrieving product by id: {}", id);
+    return super.findById(id);
+  }
 }

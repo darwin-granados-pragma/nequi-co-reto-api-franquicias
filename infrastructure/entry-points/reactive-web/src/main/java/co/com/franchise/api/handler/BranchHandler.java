@@ -43,4 +43,21 @@ public class BranchHandler {
             })));
   }
 
+  public Mono<ServerResponse> getListTopProductStockByIdFranchise(ServerRequest serverRequest) {
+    log.info("Received request to retrieve top product stock by franchise at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idFranchise = serverRequest.pathVariable("idFranchise");
+      return useCase
+          .getTopProductStockByIdFranchise(idFranchise)
+          .map(mapper::toBranchProductRestResponse)
+          .collectList()
+          .flatMap(response -> ServerResponse
+              .status(HttpStatus.OK)
+              .contentType(MediaType.APPLICATION_JSON)
+              .bodyValue(response));
+    });
+  }
 }
