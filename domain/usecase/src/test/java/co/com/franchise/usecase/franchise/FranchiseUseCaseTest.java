@@ -1,6 +1,7 @@
 package co.com.franchise.usecase.franchise;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.franchise.Franchise;
 import co.com.franchise.model.franchise.FranchiseCreate;
+import co.com.franchise.model.franchise.FranchiseUpdateName;
 import co.com.franchise.model.gateways.FranchiseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,7 @@ class FranchiseUseCaseTest {
       .name(createData.name())
       .build();
   private final String idFranchise = franchise.getId();
+  private final FranchiseUpdateName updateData = new FranchiseUpdateName("test update name");
 
   @Mock
   private FranchiseRepository repository;
@@ -83,5 +86,45 @@ class FranchiseUseCaseTest {
         .expectError(ObjectNotFoundException.class)
         .verify();
     verify(repository, times(1)).existById(idFranchise);
+  }
+
+  @Test
+  void shouldUpdateFranchiseNameSuccessfully() {
+    // Arrange
+    when(repository.findById(idFranchise)).thenReturn(Mono.just(franchise));
+    franchise.setName(updateData.name());
+    when(repository.save(any(Franchise.class))).thenReturn(Mono.just(franchise));
+
+    // Act
+    var result = useCase.updateNameByIdFranchise(idFranchise, updateData);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectNextMatches(updated -> updated
+            .getId()
+            .equals(franchise.getId()) && updated
+            .getName()
+            .equals(franchise.getName()))
+        .verifyComplete();
+    verify(repository, times(1)).findById(idFranchise);
+    verify(repository, times(1)).save(any(Franchise.class));
+  }
+
+  @Test
+  void updateNameByIdFranchise_ShouldThrowObjectNotFoundException_WhenFranchiseByIdNotFound() {
+    // Arrange
+    when(repository.findById(idFranchise)).thenReturn(Mono.empty());
+
+    // Act
+    var result = useCase.updateNameByIdFranchise(idFranchise, updateData);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+    verify(repository, times(1)).findById(idFranchise);
+    verify(repository, never()).save(any(Franchise.class));
   }
 }

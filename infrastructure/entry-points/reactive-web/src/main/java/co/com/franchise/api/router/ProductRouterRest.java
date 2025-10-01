@@ -9,6 +9,7 @@ import co.com.franchise.api.error.ErrorResponse;
 import co.com.franchise.api.error.GlobalErrorWebFilter;
 import co.com.franchise.api.handler.ProductHandler;
 import co.com.franchise.api.model.request.ProductCreateRequest;
+import co.com.franchise.api.model.request.ProductUpdateNameRequest;
 import co.com.franchise.api.model.request.ProductUpdateStockRequest;
 import co.com.franchise.api.model.response.ProductResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -120,12 +121,48 @@ public class ProductRouterRest {
               )
           )}
       )
+  ), @RouterOperation(method = RequestMethod.PATCH,
+      path = PATH_ID_PRODUCT,
+      beanClass = ProductHandler.class,
+      beanMethod = "updateNameByIdProduct",
+      operation = @Operation(operationId = "updateNameByIdProduct",
+          summary = "Update name of the product",
+          description = "Receives data of the product and return the updated object.",
+          parameters = {@Parameter(name = "idProduct",
+              in = ParameterIn.PATH,
+              description = "Identifier of the product",
+              required = true,
+              schema = @Schema(type = "String")
+          )},
+          requestBody = @RequestBody(required = true,
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ProductUpdateNameRequest.class)
+              )
+          ),
+          responses = {@ApiResponse(responseCode = "200",
+              description = "Name of the product updated successfully.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ProductResponse.class)
+              )
+          ), @ApiResponse(responseCode = "400",
+              description = "Parameters invalid or missing.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          ), @ApiResponse(responseCode = "404",
+              description = "Product not found.",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          )}
+      )
   )}
   )
   public RouterFunction<ServerResponse> productRouterFunction() {
     return route(POST(PATH), productHandler::createProduct)
         .andRoute(DELETE(PATH_ID_PRODUCT), productHandler::deleteProduct)
         .andRoute(PATCH(PATH_STOCK), productHandler::updateStockByIdProduct)
+        .andRoute(PATCH(PATH_ID_PRODUCT), productHandler::updateNameByIdProduct)
         .filter(globalErrorWebFilter);
   }
 }

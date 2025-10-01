@@ -11,6 +11,7 @@ import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.ProductRepository;
 import co.com.franchise.model.product.Product;
 import co.com.franchise.model.product.ProductCreate;
+import co.com.franchise.model.product.ProductUpdateName;
 import co.com.franchise.model.product.ProductUpdateStock;
 import co.com.franchise.usecase.branch.BranchUseCase;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ class ProductUseCaseTest {
       .build();
   private final String idProduct = product.getId();
   private final ProductUpdateStock updateData = new ProductUpdateStock(36);
+  private final ProductUpdateName updateNameData = new ProductUpdateName("test update name");
 
   @Mock
   private ProductRepository repository;
@@ -146,5 +148,28 @@ class ProductUseCaseTest {
         .verify();
     verify(repository, times(1)).findById(idProduct);
     verify(repository, never()).save(any(Product.class));
+  }
+
+  @Test
+  void shouldUpdateProductNameSuccessfully() {
+    // Arrange
+    when(repository.findById(idProduct)).thenReturn(Mono.just(product));
+    product.setName(updateNameData.name());
+    when(repository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+    // Act
+    var result = useCase.updateNameByIdProduct(idProduct, updateNameData);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectNextMatches(updated -> updated
+            .getId()
+            .equals(product.getId()) && updated
+            .getName()
+            .equals(product.getName()))
+        .verifyComplete();
+    verify(repository, times(1)).findById(idProduct);
+    verify(repository, times(1)).save(any(Product.class));
   }
 }

@@ -2,12 +2,14 @@ package co.com.franchise.usecase.branch;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import co.com.franchise.model.branch.Branch;
 import co.com.franchise.model.branch.BranchCreate;
+import co.com.franchise.model.branch.BranchUpdateName;
 import co.com.franchise.model.exception.ObjectNotFoundException;
 import co.com.franchise.model.gateways.BranchRepository;
 import co.com.franchise.model.product.ProductDomainResponse;
@@ -33,6 +35,7 @@ class BranchUseCaseTest {
       .idFranchise(createData.idFranchise())
       .build();
   private final String idBranch = branch.getId();
+  private final BranchUpdateName updateData = new BranchUpdateName("test update name");
 
   @Mock
   private BranchRepository repository;
@@ -105,35 +108,94 @@ class BranchUseCaseTest {
   void shouldGetTopProductStockByIdFranchise() {
     // Arrange
     String idFranchise = "franchise-123";
-    var branch1 = Branch.builder().id("branch-1").idFranchise(idFranchise).name("test name").build();
-    var branch2 = Branch.builder().id("branch-2").idFranchise(idFranchise).name("test name 2").build();
+    var branch1 = Branch
+        .builder()
+        .id("branch-1")
+        .idFranchise(idFranchise)
+        .name("test name")
+        .build();
+    var branch2 = Branch
+        .builder()
+        .id("branch-2")
+        .idFranchise(idFranchise)
+        .name("test name 2")
+        .build();
     var topProduct1 = new ProductDomainResponse("prod-A", "Producto Top A", 100);
     var topProduct2 = new ProductDomainResponse("prod-B", "Producto Top B", 150);
 
     when(franchiseUseCase.validateFranchiseById(idFranchise)).thenReturn(Mono.empty());
     when(repository.findAllByIdFranchise(idFranchise)).thenReturn(Flux.just(branch1, branch2));
-    when(productRetrieveUseCase.getTopProductStockByIdBranch(branch1.getId())).thenReturn(Mono.just(topProduct1));
-    when(productRetrieveUseCase.getTopProductStockByIdBranch(branch2.getId())).thenReturn(Mono.just(topProduct2));
+    when(productRetrieveUseCase.getTopProductStockByIdBranch(branch1.getId())).thenReturn(Mono.just(
+        topProduct1));
+    when(productRetrieveUseCase.getTopProductStockByIdBranch(branch2.getId())).thenReturn(Mono.just(
+        topProduct2));
 
     // Act
     var resultFlux = useCase.getTopProductStockByIdFranchise(idFranchise);
 
     // Assert
-    StepVerifier.create(resultFlux)
-        .expectNextMatches(response ->
-            response.getId().equals(branch1.getId()) &&
-                response.getName().equals(branch1.getName()) &&
-                response.getProductResponse().getId().equals(topProduct1.getId())
-        )
-        .expectNextMatches(response ->
-            response.getId().equals(branch2.getId()) &&
-                response.getName().equals(branch2.getName()) &&
-                response.getProductResponse().getId().equals(topProduct2.getId())
-        )
+    StepVerifier
+        .create(resultFlux)
+        .expectNextMatches(response -> response
+            .getId()
+            .equals(branch1.getId()) && response
+            .getName()
+            .equals(branch1.getName()) && response
+            .getProductResponse()
+            .getId()
+            .equals(topProduct1.getId()))
+        .expectNextMatches(response -> response
+            .getId()
+            .equals(branch2.getId()) && response
+            .getName()
+            .equals(branch2.getName()) && response
+            .getProductResponse()
+            .getId()
+            .equals(topProduct2.getId()))
         .verifyComplete();
 
     verify(franchiseUseCase, times(1)).validateFranchiseById(idFranchise);
     verify(repository, times(1)).findAllByIdFranchise(idFranchise);
     verify(productRetrieveUseCase, times(2)).getTopProductStockByIdBranch(anyString());
+  }
+
+  @Test
+  void shouldUpdateBranchNameSuccessfully() {
+    // Arrange
+    when(repository.findById(idBranch)).thenReturn(Mono.just(branch));
+    branch.setName(updateData.name());
+    when(repository.save(any(Branch.class))).thenReturn(Mono.just(branch));
+
+    // Act
+    var result = useCase.updateNameByIdBranch(idBranch, updateData);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectNextMatches(updated -> updated
+            .getId()
+            .equals(branch.getId()) && updated
+            .getName()
+            .equals(branch.getName()))
+        .verifyComplete();
+    verify(repository, times(1)).findById(idBranch);
+    verify(repository, times(1)).save(any(Branch.class));
+  }
+
+  @Test
+  void updateNameByIdBranch_ShouldThrowObjectNotFoundException_WhenBranchByIdNotFound() {
+    // Arrange
+    when(repository.findById(idBranch)).thenReturn(Mono.empty());
+
+    // Act
+    var result = useCase.updateNameByIdBranch(idBranch, updateData);
+
+    // Arrange
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+    verify(repository, times(1)).findById(idBranch);
+    verify(repository, never()).save(any(Branch.class));
   }
 }

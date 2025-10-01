@@ -2,7 +2,9 @@ package co.com.franchise.api.handler;
 
 import co.com.franchise.api.mapper.FranchiseRestMapper;
 import co.com.franchise.api.model.request.FranchiseCreateRequest;
+import co.com.franchise.api.model.request.FranchiseUpdateNameRequest;
 import co.com.franchise.model.franchise.FranchiseCreate;
+import co.com.franchise.model.franchise.FranchiseUpdateName;
 import co.com.franchise.usecase.franchise.FranchiseUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,4 +45,27 @@ public class FranchiseHandler {
             })));
   }
 
+  public Mono<ServerResponse> updateNameByIdFranchise(ServerRequest serverRequest) {
+    log.info("Received request to update name of the franchise at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idFranchise = serverRequest.pathVariable("idFranchise");
+      return serverRequest
+          .bodyToMono(FranchiseUpdateNameRequest.class)
+          .flatMap(request -> requestValidator
+              .validate(request)
+              .then(Mono.defer(() -> {
+                FranchiseUpdateName updatedData = mapper.toFranchiseUpdateName(request);
+                return useCase
+                    .updateNameByIdFranchise(idFranchise, updatedData)
+                    .map(mapper::toFranchiseResponse)
+                    .flatMap(response -> ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(response));
+              })));
+    });
+  }
 }

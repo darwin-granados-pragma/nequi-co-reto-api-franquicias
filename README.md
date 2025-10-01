@@ -1,47 +1,111 @@
-# Proyecto Base Implementando Clean Architecture
+# **api-franchise**
 
-## Antes de Iniciar
+**Descripci√≥n:**  
+Este proyecto es una API desarrollada con Spring Webflux que permite gestionar una red de franquicias, sigue buenas pr√°cticas de desarrollo como clean code, SOLID, kiss y dry. Adem√°s, se ha logrado una cobertura de pruebas del 100% con Jacoco en la logica de negocio.
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por ˙ltimo el inicio y configuraciÛn de la aplicaciÛn.
+---
 
-Lee el artÌculo [Clean Architecture ó Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+## **Herramientas Utilizadas**
 
-# Arquitectura
+- **Lenguaje:** Java 17
+- **Framework:** Spring
+- **Gestor de Dependencias:** Gradle (versi√≥n 8.14.3)
+- **Base de Datos:** PostgreSQL
+- **Contenedorizaci√≥n:** Docker
+- **Documentaci√≥n API:** Swagger UI ([http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html))
+- **Pruebas Unitarias:** JUnit 5, Mockito
+- **Cobertura de la logica de negocio:** Jacoco (100% de cobertura)
+
+---
+
+## **Requisitos Previos**
+
+Para ejecutar este proyecto, aseg√∫rate de tener instalado lo siguiente:
+
+1. **Java 17**  
+   - Descarga e instala desde [OpenJDK](https://openjdk.org/).
+
+2. **Gradle 8.14.3**
+   - Descarga e instala desde [Gradle](https://gradle.org/install/).
+
+3. **Crear base de datos en postgreSQL**
+
+---
+
+## **Configuraci√≥n Inicial**
+
+1. **Clona el Repositorio**
+    - git clone https://github.com/darwin-granados-pragma/nequi-co-reto-api-franquicias.git
+    - cd nequi-co-reto-api-franquicias
+
+2. **Configura el archivo .env**
+    - Copia el contenido archivo .env.example a .env:
+        - cp .env.example .env
+    - Edita el archivo .env con las variables necesarias para el entorno
+
+3. **Configura el BootRun y despliega**
+   - Agrega en "Environment variables" la ubicaci√≥n de tu .env
+   - Inicia la aplicaci√≥n
+
+4. **Verifica la Documentaci√≥n de OpenAPI**
+   Una vez que el proyecto est√© en funcionamiento, accede a la documentaci√≥n de la API en:
+    - http://localhost:8080/swagger-ui/index.html
+
+---
+
+## **Cobertura de Pruebas**
+Se ha implementado Jacoco para medir la cobertura de pruebas. El informe indica una cobertura del 100%.
+- Para generar el informe localmente:
+    - gradle :usecase:jacocoTestReport
+- El informe estar√° disponible en:
+    - domain/usecase/build/reports/jacocoHtml/index.html
+
+---
+
+## Proyecto Base Implementando Clean Architecture
+
+### Antes de Iniciar
+
+Empezaremos por explicar los diferentes componentes del proyecto y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por √∫ltimo el inicio y configuraci√≥n de la aplicaci√≥n.
+
+Lee el art√≠culo [Clean Architecture - Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+
+## Arquitectura
 
 ![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
 
-## Domain
+### Domain
 
-Es el mÛdulo m·s interno de la arquitectura, pertenece a la capa del dominio y encapsula la lÛgica y reglas del negocio mediante modelos y entidades del dominio.
+Es el m√≥dulo m√°s interno de la arquitectura, pertenece a la capa del dominio y encapsula la l√≥gica y reglas del negocio mediante modelos y entidades del dominio.
 
-## Usecases
+### Usecases
 
-Este mÛdulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lÛgica de aplicaciÛn y reacciona a las invocaciones desde el mÛdulo de entry points, orquestando los flujos hacia el mÛdulo de entities.
+Este m√≥dulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define l√≥gica de aplicaci√≥n y reacciona a las invocaciones desde el m√≥dulo de entry points, orquestando los flujos hacia el m√≥dulo de entities.
 
-## Infrastructure
+### Infrastructure
 
-### Helpers
+#### Helpers
 
 En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
 
-Estas utilidades no est·n arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genÈricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrÛn de diseÒo [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+Estas utilidades no est√°n arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
+gen√©ricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
+basadas en el patr√≥n de dise√±o [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
 
 Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
 
-### Driven Adapters
+#### Driven Adapters
 
 Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
 soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
 interactuar.
 
-### Entry Points
+#### Entry Points
 
-Los entry points representan los puntos de entrada de la aplicaciÛn o el inicio de los flujos de negocio.
+Los entry points representan los puntos de entrada de la aplicaci√≥n o el inicio de los flujos de negocio.
 
-## Application
+### Application
 
-Este mÛdulo es el m·s externo de la arquitectura, es el encargado de ensamblar los distintos mÛdulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma autom·tica, inyectando en Èstos instancias concretas de las dependencias declaradas. Adem·s inicia la aplicaciÛn (es el ˙nico mÛdulo del proyecto donde encontraremos la funciÛn ìpublic static void main(String[] args)î.
+Este m√≥dulo es el m√°s externo de la arquitectura, es el encargado de ensamblar los distintos m√≥dulos, resolver las dependencias y crear los beans de los casos de uso (UseCases) de forma autom√°tica, inyectando en estas instancias concretas de las dependencias declaradas. Adem√°s inicia la aplicaci√≥n (es el unico m√≥dulo del proyecto donde encontraremos la funci√≥n public static void main(String[] args).
 
 **Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
