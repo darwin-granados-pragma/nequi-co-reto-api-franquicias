@@ -1,0 +1,12 @@
+# database environment
+db_name     =
+db_username =
+db_password =
+
+# name of the ec2 key
+ec2_key_name =
+
+# repository url environment
+git_repo_url = "https://github.com/darwin-granados-pragma/nequi-co-reto-api-franquicias.git"
+
+allowed_access_ip = "0.0.0.0/0"
